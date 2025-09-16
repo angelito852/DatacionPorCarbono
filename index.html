@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datación por Carbono-14 - Estilo Arqueológico Neón</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
+            --neon-yellow: #fff01f;
+            --neon-orange: #ff5e1a;
+            --dark-bg: #0a0a1a;
+            --darker-bg: #050510;
+            --archeology-brown: #8b4513;
+            --archeology-sand: #f4a460;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--darker-bg);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 20%),
+                linear-gradient(to bottom, rgba(10, 10, 26, 0.9), rgba(5, 5, 16, 0.9));
+        }
+        
+        /* Fondos animados con temática arqueológica */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .hieroglyph {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            color: var(--archeology-sand);
+            animation: fadeInOut 15s infinite alternate;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.05; }
+            50% { opacity: 0.15; }
+        }
+        
+        .sand-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .sand {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: var(--archeology-sand);
+            border-radius: 50%;
+            animation: sandFall 20s infinite linear;
+        }
+        
+        @keyframes sandFall {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(244, 164, 96, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(244, 164, 96, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            perspective: 500px;
+            transform-style: preserve-3d;
+            transform: rotateX(75deg);
+            animation: gridMove 20s infinite linear;
+        }
+        
+        @keyframes gridMove {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 0 30px;
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            z-index: 1;
+            position: relative;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(244, 164, 96, 0.3);
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--neon-orange), 0 0 20px var(--neon-orange), 0 0 30px var(--neon-orange);
+            animation: pulsate 2s infinite alternate;
+            color: var(--archeology-sand);
+        }
+        
+        @keyframes pulsate {
+            0% {
+                text-shadow: 0 0 10px var(--neon-orange), 0 0 20px var(--neon-orange), 0 0 30px var(--neon-orange);
+            }
+            100% {
+                text-shadow: 0 0 15px var(--neon-orange), 0 0 30px var(--neon-orange), 0 0 45px var(--neon-orange);
+            }
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 5px var(--neon-yellow);
+            letter-spacing: 2px;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(10, 10, 26, 0.8);
+            border: 1px solid rgba(244, 164, 96, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(244, 164, 96, 0.2);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--neon-orange), transparent);
+            animation: scanLine 3s infinite linear;
+        }
+        
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .panel:hover {
+            box-shadow: 0 0 20px rgba(244, 164, 96, 0.4);
+            transform: translateY(-5px);
+        }
+        
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-orange);
+            text-shadow: 0 0 5px var(--neon-orange);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 1px solid rgba(244, 164, 96, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 3px var(--neon-yellow);
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(5, 5, 16, 0.8);
+            border: 1px solid var(--neon-yellow);
+            border-radius: 5px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            box-shadow: 0 0 10px rgba(255, 240, 31, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 240, 31, 0.5);
+        }
+        
+        button {
+            background: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 3px var(--neon-green);
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: rgba(57, 255, 20, 0.1);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(5, 5, 16, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid var(--neon-orange);
+        }
+        
+        .result h3 {
+            color: var(--neon-orange);
+            text-shadow: 0 0 5px var(--neon-orange);
+            margin-bottom: 15px;
+        }
+        
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--neon-orange);
+            text-shadow: 0 0 10px var(--neon-orange);
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .simulation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .artifact-visual {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .footprint {
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle at center, transparent 30%, var(--archeology-sand) 70%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 20px var(--neon-orange);
+            animation: pulse 3s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px var(--neon-orange); }
+            100% { box-shadow: 0 0 30px var(--neon-orange); }
+        }
+        
+        .footprint::before {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            top: 20px;
+            left: 20px;
+            background: radial-gradient(circle at 40% 40%, var(--darker-bg) 20%, transparent 30%),
+                        radial-gradient(ellipse at 30% 60%, var(--darker-bg) 15%, transparent 20%),
+                        radial-gradient(ellipse at 60% 60%, var(--darker-bg) 15%, transparent 20%);
+            border-radius: 50%;
+        }
+        
+        .carbon-atom {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+        }
+        
+        .nucleus {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: var(--neon-orange);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-orange);
+            animation: glow 2s infinite alternate;
+        }
+        
+        .electron {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-blue);
+            animation: orbit 3s infinite linear;
+        }
+        
+        .electron:nth-child(2) {
+            animation-duration: 4s;
+            animation-delay: 0.5s;
+        }
+        
+        .electron:nth-child(3) {
+            animation-duration: 5s;
+            animation-delay: 1s;
+        }
+        
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg) translateX(35px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(35px) rotate(-360deg);
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 1px solid rgba(244, 164, 96, 0.3);
+            font-size: 0.9rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 3px var(--neon-yellow);
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="sand-particles" id="sand-particles"></div>
+        <div class="grid-lines"></div>
+        <div class="hieroglyph" style="top: 10%; left: 5%;">𓀀</div>
+        <div class="hieroglyph" style="top: 30%; left: 90%;">𓁶</div>
+        <div class="hieroglyph" style="top: 70%; left: 15%;">𓂀</div>
+        <div class="hieroglyph" style="top: 50%; left: 80%;">𓃀</div>
+        <div class="hieroglyph" style="top: 85%; left: 60%;">𓄀</div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Datación por Carbono-14</h1>
+            <p class="subtitle">Determinación de antigüedad de muestras orgánicas mediante decaimiento radiactivo</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel">
+                <h2>Calculadora Arqueológica</h2>
+                <div class="form-group">
+                    <label for="half-life">Vida media del C-14 (años):</label>
+                    <input type="number" id="half-life" value="5730" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="remaining">Porcentaje de C-14 restante:</label>
+                    <input type="number" id="remaining" value="77.45" min="0.01" max="100" step="0.01">
+                </div>
+                
+                <button id="calculate-btn">Calcular Antigüedad</button>
+                <button id="reset-btn">Reiniciar Valores</button>
+                
+                <div class="result">
+                    <h3>Resultado</h3>
+                    <p>La antigüedad estimada de la muestra es:</p>
+                    <p class="result-value" id="age-result">-</p>
+                </div>
+                
+                <div class="formula-explanation">
+                    <h3 style="margin-top: 20px;">Procedimiento de Cálculo</h3>
+                    <p>1. Primero calculamos la constante de decaimiento (k):</p>
+                    <p style="color: var(--neon-yellow);">k = ln(0.5) / vida_media</p>
+                    <p>2. Luego resolvemos para t en la ecuación:</p>
+                    <p style="color: var(--neon-yellow);">f(t) = f(0) · e<sup>kt</sup></p>
+                    <p style="color: var(--neon-yellow);">t = ln(f(t)/f(0)) / k</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Simulación de Decaimiento</h2>
+                <div class="chart-container">
+                    <canvas id="decay-chart"></canvas>
+                </div>
+                
+                <div class="artifact-visual">
+                    <div class="footprint">
+                        <div class="carbon-atom">
+                            <div class="nucleus">C14</div>
+                            <div class="electron"></div>
+                            <div class="electron"></div>
+                            <div class="electron"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="simulation-controls">
+                    <button id="play-btn">Reproducir</button>
+                    <button id="pause-btn">Pausar</button>
+                    <button id="reset-sim-btn">Reiniciar Simulación</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Contexto Arqueológico</h2>
+            <p>El método de datación por carbono-14 fue desarrollado por Willard Libby en 1949 y revolucionó la arqueología al permitir fechar materiales orgánicos con antigüedades de hasta 50,000 años.</p>
+            <p style="text-align: center; margin: 15px 0; font-size: 1.2rem;">
+                <strong>f(t) = f(0) · e<sup>kt</sup></strong>
+            </p>
+            <p>Donde:</p>
+            <ul style="list-style-position: inside; margin-left: 20px;">
+                <li><strong>f(0)</strong>: Cantidad inicial de carbono-14</li>
+                <li><strong>f(t)</strong>: Cantidad restante después de tiempo t</li>
+                <li><strong>k</strong>: Constante de decaimiento</li>
+                <li><strong>t</strong>: Tiempo transcurrido</li>
+            </ul>
+            <p>En el caso de las huellas de Acahualinca en Nicaragua, el análisis de carbono-14 permitió determinar que estas huellas fosilizadas tienen aproximadamente 2,120 años de antigüedad, proporcionando información valiosa sobre los habitantes precolombinos de la región.</p>
+        </div>
+        
+        <footer>
+            <p>Simulación de Datación por Carbono-14 | Arqueología y Métodos Numéricos</p>
+        </footer>
+    </div>
+
+    <script>
+        // Crear partículas de arena
+        function createSandParticles() {
+            const sandContainer = document.getElementById('sand-particles');
+            const sandCount = 100;
+            
+            for (let i = 0; i < sandCount; i++) {
+                const sand = document.createElement('div');
+                sand.classList.add('sand');
+                
+                // Posición aleatoria
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                sand.style.left = `${x}vw`;
+                sand.style.top = `${y}vh`;
+                
+                // Tamaño aleatorio
+                const size = Math.random() * 3 + 1;
+                sand.style.width = `${size}px`;
+                sand.style.height = `${size}px`;
+                
+                // Retraso de animación aleatorio
+                const delay = Math.random() * 20;
+                sand.style.animationDelay = `${delay}s`;
+                
+                sandContainer.appendChild(sand);
+            }
+        }
+        
+        // Variables globales
+        let decayChart;
+        let animationInterval;
+        let currentTime = 0;
+        const initialHalfLife = 5730;
+        const initialRemaining = 77.45;
+        
+        // Elementos DOM
+        const halfLifeInput = document.getElementById('half-life');
+        const remainingInput = document.getElementById('remaining');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetSimBtn = document.getElementById('reset-sim-btn');
+        const ageResult = document.getElementById('age-result');
+        
+        // Inicializar la gráfica
+        function initChart() {
+            const ctx = document.getElementById('decay-chart').getContext('2d');
+            decayChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Carbono-14 restante (%)',
+                        data: [],
+                        borderColor: '#ff5e1a',
+                        backgroundColor: 'rgba(255, 94, 26, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ff5e1a',
+                        pointBorderColor: '#ffffff',
+                        pointHoverRadius: 6,
+                        pointRadius: 4,
+                        pointBorderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 0,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Porcentaje de C14 restante',
+                                color: '#fff01f'
+                            },
+                            grid: {
+                                color: 'rgba(255, 240, 31, 0.1)'
+                            },
+                            ticks: {
+                                color: '#fff01f'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tiempo (años)',
+                                color: '#fff01f'
+                            },
+                            grid: {
+                                color: 'rgba(255, 240, 31, 0.1)'
+                            },
+                            ticks: {
+                                color: '#fff01f'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#fff01f',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 26, 0.9)',
+                            titleColor: '#ff5e1a',
+                            bodyColor: '#fff01f',
+                            borderColor: '#fff01f',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Calcular y mostrar el resultado inicial
+            calculateAge(initialHalfLife, initialRemaining);
+            updateChart(initialHalfLife);
+        }
+        
+        // Calcular la constante k de decaimiento
+        function calculateDecayConstant(halfLife) {
+            return Math.log(0.5) / halfLife;
+        }
+        
+        // Calcular la edad basada en el porcentaje restante
+        function calculateAge(halfLife, remainingPercentage) {
+            const k = calculateDecayConstant(halfLife);
+            const age = Math.log(remainingPercentage / 100) / k;
+            return Math.round(age);
+        }
+        
+        // Actualizar la gráfica con nuevos datos
+        function updateChart(halfLife) {
+            const k = calculateDecayConstant(halfLife);
+            const timeValues = [];
+            const decayValues = [];
+            
+            // Generar datos para 4 vidas medias
+            const maxTime = halfLife * 4;
+            const step = maxTime / 50;
+            
+            for (let t = 0; t <= maxTime; t += step) {
+                timeValues.push(t);
+                decayValues.push(100 * Math.exp(k * t));
+            }
+            
+            decayChart.data.labels = timeValues;
+            decayChart.data.datasets[0].data = decayValues;
+            decayChart.update();
+        }
+        
+        // Iniciar la animación de decaimiento
+        function startAnimation() {
+            clearInterval(animationInterval);
+            const halfLife = parseFloat(halfLifeInput.value);
+            const k = calculateDecayConstant(halfLife);
+            const remainingPercentage = parseFloat(remainingInput.value);
+            
+            currentTime = 0;
+            
+            animationInterval = setInterval(() => {
+                currentTime += 100; // Incrementar en 100 años
+                const decayed = 100 * Math.exp(k * currentTime);
+                
+                if (decayed <= 0.1) {
+                    clearInterval(animationInterval);
+                }
+                
+                // Actualizar la gráfica con el punto actual
+                decayChart.data.datasets[0].data = decayChart.data.datasets[0].data.map((value, index) => {
+                    const t = decayChart.data.labels[index];
+                    return (t <= currentTime) ? value : null;
+                });
+                
+                decayChart.update();
+                
+                // Resaltar el punto actual
+                if (decayChart.tooltip) {
+                    const dataIndex = decayChart.data.labels.findIndex(t => t >= currentTime);
+                    if (dataIndex !== -1) {
+                        decayChart.tooltip.setActiveElements([{ datasetIndex: 0, index: dataIndex }]);
+                        decayChart.update();
+                    }
+                }
+            }, 100);
+        }
+        
+        // Pausar la animación
+        function pauseAnimation() {
+            clearInterval(animationInterval);
+        }
+        
+        // Reiniciar la animación
+        function resetAnimation() {
+            pauseAnimation();
+            updateChart(parseFloat(halfLifeInput.value));
+            currentTime = 0;
+        }
+        
+        // Reiniciar los valores a los predeterminados
+        function resetValues() {
+            halfLifeInput.value = "5730";
+            remainingInput.value = "77.45";
+            calculateAge(initialHalfLife, initialRemaining);
+            resetAnimation();
+        }
+        
+        // Event Listeners
+        calculateBtn.addEventListener('click', () => {
+            const halfLife = parseFloat(halfLifeInput.value);
+            const remaining = parseFloat(remainingInput.value);
+            
+            if (isNaN(halfLife) || isNaN(remaining) || halfLife <= 0 || remaining <= 0 || remaining > 100) {
+                alert('Por favor, introduce valores válidos (Vida media > 0, Porcentaje entre 0 y 100)');
+                return;
+            }
+            
+            const age = calculateAge(halfLife, remaining);
+            ageResult.textContent = age.toLocaleString() + " años";
+            
+            updateChart(halfLife);
+            resetAnimation();
+        });
+        
+        resetBtn.addEventListener('click', resetValues);
+        
+        playBtn.addEventListener('click', startAnimation);
+        
+        pauseBtn.addEventListener('click', pauseAnimation);
+        
+        resetSimBtn.addEventListener('click', resetAnimation);
+        
+        // Inicializar la aplicación cuando se carga la página
+        window.addEventListener('load', function() {
+            createSandParticles();
+            initChart();
+        });
+    </script>
+</body>
+</html>
